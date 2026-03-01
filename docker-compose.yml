@@ -4,4 +4,4 @@ services:
     container_name: team-service
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-8080}:8080"
+      - "${APP_PORT:-8081}:8081"
