@@ -1,0 +1,41 @@
+name: Deploy to VM
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy project to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          source: "."
+          target: ${{ secrets.DEPLOY_PATH || '/opt/team-service' }}
+          overwrite: true
+          strip_components: 0
+
+      - name: Build and restart service on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          script: |
+            set -euo pipefail
+            mkdir -p "${{ secrets.DEPLOY_PATH || '/opt/team-service' }}"
+            cd "${{ secrets.DEPLOY_PATH || '/opt/team-service' }}"
+            APP_PORT="${{ secrets.APP_PORT || 8080 }}" docker compose up -d --build
+            docker image prune -f
