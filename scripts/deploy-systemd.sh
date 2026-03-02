@@ -9,13 +9,13 @@ SERVICE_FILE="/etc/systemd/system/${APP_NAME}.service"
 
 if command -v apt-get >/dev/null 2>&1; then
   sudo apt-get update -y
-  sudo apt-get install -y openjdk-25-jre-headless
+  sudo apt-get install -y openjdk-21-jre-headless
 elif command -v dnf >/dev/null 2>&1; then
-  sudo dnf install -y java-25-openjdk
+  sudo dnf install -y java-21-openjdk
 elif command -v yum >/dev/null 2>&1; then
-  sudo yum install -y java-25-openjdk
+  sudo yum install -y java-21-openjdk
 else
-  echo "Unsupported package manager. Install Java 25 manually." >&2
+  echo "Unsupported package manager. Install Java 21 manually." >&2
   exit 1
 fi
 
