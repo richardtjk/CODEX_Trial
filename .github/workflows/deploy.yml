@@ -1,4 +1,4 @@
-name: Deploy to VM
+name: Deploy to VM (direct Spring Boot)
 
 on:
   workflow_dispatch:
@@ -14,19 +14,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Copy project to server
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build jar
+        run: mvn -B -DskipTests package
+
+      - name: Upload jar and deploy script
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
-          source: "."
-          target: ${{ secrets.DEPLOY_PATH || '/opt/team-service' }}
+          source: "target/team-service-0.0.1-SNAPSHOT.jar,scripts/deploy-systemd.sh"
+          target: ${{ secrets.DEPLOY_PATH || '/tmp/team-service-deploy' }}
           overwrite: true
-          strip_components: 0
 
-      - name: Build and restart service on server
+      - name: Install Java and restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -35,7 +44,10 @@ jobs:
           port: ${{ secrets.DEPLOY_PORT || 22 }}
           script: |
             set -euo pipefail
-            mkdir -p "${{ secrets.DEPLOY_PATH || '/opt/team-service' }}"
-            cd "${{ secrets.DEPLOY_PATH || '/opt/team-service' }}"
-            APP_PORT="${{ secrets.APP_PORT || 8080 }}" docker compose up -d --build
-            docker image prune -f
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH || '/tmp/team-service-deploy' }}"
+            cd "$DEPLOY_PATH"
+            APP_NAME="team-service" \
+            APP_DIR="/opt/team-service" \
+            APP_PORT="${{ secrets.APP_PORT || 8080 }}" \
+            JAR_SOURCE="$DEPLOY_PATH/target/team-service-0.0.1-SNAPSHOT.jar" \
+            bash "$DEPLOY_PATH/scripts/deploy-systemd.sh"
