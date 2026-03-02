@@ -7,9 +7,31 @@ APP_PORT="${APP_PORT:-8080}"
 JAR_SOURCE="${JAR_SOURCE:-$APP_DIR/team-service.jar}"
 SERVICE_FILE="/etc/systemd/system/${APP_NAME}.service"
 
+wait_for_apt_locks() {
+  local retries=40
+  local sleep_seconds=3
+
+  while (( retries > 0 )); do
+    if ! sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 \
+      && ! sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 \
+      && ! sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; then
+      return 0
+    fi
+
+    echo "apt/dpkg lock is busy, waiting ${sleep_seconds}s..."
+    sleep "$sleep_seconds"
+    ((retries--))
+  done
+
+  echo "Timed out waiting for apt/dpkg locks to clear." >&2
+  return 1
+}
+
 if command -v apt-get >/dev/null 2>&1; then
-  sudo apt-get update -y
-  sudo apt-get install -y openjdk-21-jre-headless
+  wait_for_apt_locks
+  sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
+  wait_for_apt_locks
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-21-jre-headless
 elif command -v dnf >/dev/null 2>&1; then
   sudo dnf install -y java-21-openjdk
 elif command -v yum >/dev/null 2>&1; then

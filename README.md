@@ -97,6 +97,8 @@ The workflow will:
 3. Install Java 21 if needed.
 4. Install/update a systemd service named `team-service` and restart it.
 
+The deploy script now waits for apt/dpkg locks to clear before installing Java on Debian/Ubuntu hosts, reducing failures from transient lock contention.
+
 Useful server commands:
 
 ```bash
