@@ -4,7 +4,7 @@ A Spring Boot REST API that creates balanced teams from a list of participants u
 
 ## Requirements
 
-- Java 17+
+- Java 25+
 - Maven 3.9+
 
 ## Run locally
@@ -78,6 +78,14 @@ Optional:
 - `DEPLOY_PATH`: temp upload directory on server (default `/tmp/team-service-deploy`)
 - `APP_PORT`: host port for the service (default `8080`)
 
+### Connectivity test action
+
+You can validate SSH connectivity before deployment by running:
+
+- **Actions → Test server connectivity → Run workflow**
+
+This workflow uses `DEPLOY_HOST`, `DEPLOY_USER`, and `DEPLOY_SSH_KEY` (plus optional `DEPLOY_PORT`) and only checks that SSH access works.
+
 ### 3) Deploy
 
 - Push to `main`, or
@@ -86,7 +94,7 @@ Optional:
 The workflow will:
 1. Build `target/team-service-0.0.1-SNAPSHOT.jar` in GitHub Actions.
 2. Copy the JAR + deploy script to your server.
-3. Install Java 17 if needed.
+3. Install Java 25 if needed.
 4. Install/update a systemd service named `team-service` and restart it.
 
 Useful server commands:
