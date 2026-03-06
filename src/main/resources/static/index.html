@@ -12,12 +12,13 @@
 </head>
 <body>
   <h1>Team API Quick Test</h1>
-  <p>Click the button to send default test data to <code>POST /api/teams/generate</code>.</p>
+  <p>Click the button to send default test data to <code>POST http://&lt;host&gt;:8081/api/teams/generate</code>.</p>
   <button id="runTest">Run Default Test</button>
   <pre id="output">No request sent yet.</pre>
 
   <script>
     const output = document.getElementById('output');
+    const apiBaseUrl = `${window.location.protocol}//${window.location.hostname || 'localhost'}:8081`;
 
     const defaultPayload = {
       participants: ["Alice", "Bob", "Charlie", "Dana", "Eli", "Fran", "Gabe"],
@@ -30,7 +31,7 @@
       output.textContent = 'Sending request...';
 
       try {
-        const response = await fetch('/api/teams/generate', {
+        const response = await fetch(`${apiBaseUrl}/api/teams/generate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(defaultPayload)
@@ -49,7 +50,7 @@
       } catch (error) {
         output.textContent = JSON.stringify({
           error: String(error),
-          hint: 'Open this page from the deployed Spring Boot app URL (same host/port as API).'
+          hint: 'Ensure port 8081 is open and the API is reachable at the same host on port 8081.'
         }, null, 2);
       }
     });

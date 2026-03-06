@@ -59,6 +59,7 @@ Click **Run Default Test** to send built-in sample payload data to `POST /api/te
 
 ## Validation rules
 
+- CORS is enabled for browser testing origins `http://207.211.164.167`, `http://localhost`, and `http://127.0.0.1`.
 - `participants` must not be empty.
 - `minTeamSize <= maxTeamSize`
 - `idealTeamSize` must be between `minTeamSize` and `maxTeamSize`.
