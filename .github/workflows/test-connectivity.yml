@@ -1,0 +1,32 @@
+name: Test server connectivity
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ssh-connectivity-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate required secrets exist
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          [ -n "$DEPLOY_HOST" ]
+          [ -n "$DEPLOY_USER" ]
+          [ -n "$DEPLOY_SSH_KEY" ]
+
+      - name: Test SSH connectivity to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          script: |
+            set -euo pipefail
+            echo "Connected to $(hostname) as $(whoami)"
+            uname -a
