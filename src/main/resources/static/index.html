@@ -3,70 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Team Generator API Tester</title>
+  <title>Team API Quick Test</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; background: #f8fafc; color: #111827; }
-    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem; max-width: 900px; }
-    textarea { width: 100%; min-height: 220px; font-family: monospace; margin-top: .5rem; }
-    input { width: 90px; margin-right: .75rem; }
-    button { background:#2563eb; color:#fff; border:0; padding:.6rem 1rem; border-radius:8px; cursor:pointer; }
-    pre { background:#0b1020; color:#d1fae5; padding:1rem; border-radius:8px; overflow:auto; }
-    .row { margin: .75rem 0; }
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    button { padding: 0.6rem 1rem; cursor: pointer; }
+    pre { background: #111827; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow: auto; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Generate Teams API Tester</h1>
-    <p>Use this page to test <code>POST /api/teams/generate</code>.</p>
-
-    <div class="row">
-      <label>API Base URL:</label>
-      <input id="baseUrl" style="width:260px" value="http://localhost:8080" />
-    </div>
-
-    <div class="row">
-      <label>minTeamSize</label><input id="minTeamSize" type="number" value="2" />
-      <label>maxTeamSize</label><input id="maxTeamSize" type="number" value="4" />
-      <label>idealTeamSize</label><input id="idealTeamSize" type="number" value="3" />
-    </div>
-
-    <div class="row">
-      <label for="participants">Participants (comma or newline separated)</label>
-      <textarea id="participants">Alice, Bob, Charlie, Dana, Eli, Fran, Gabe, Hana</textarea>
-    </div>
-
-    <button id="sendBtn">Generate Teams</button>
-    <h3>Response</h3>
-    <pre id="output">No request sent yet.</pre>
-  </div>
+  <h1>Team API Quick Test</h1>
+  <p>Click the button to send default test data to <code>POST /api/teams/generate</code>.</p>
+  <button id="runTest">Run Default Test</button>
+  <pre id="output">No request sent yet.</pre>
 
   <script>
-    const sendBtn = document.getElementById('sendBtn');
     const output = document.getElementById('output');
 
-    function parseParticipants(raw) {
-      return raw
-        .split(/[\n,]/)
-        .map(v => v.trim())
-        .filter(Boolean);
-    }
+    const defaultPayload = {
+      participants: ["Alice", "Bob", "Charlie", "Dana", "Eli", "Fran", "Gabe"],
+      minTeamSize: 2,
+      maxTeamSize: 4,
+      idealTeamSize: 3
+    };
 
-    sendBtn.addEventListener('click', async () => {
-      const baseUrl = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
-      const payload = {
-        participants: parseParticipants(document.getElementById('participants').value),
-        minTeamSize: Number(document.getElementById('minTeamSize').value),
-        maxTeamSize: Number(document.getElementById('maxTeamSize').value),
-        idealTeamSize: Number(document.getElementById('idealTeamSize').value)
-      };
-
+    document.getElementById('runTest').addEventListener('click', async () => {
       output.textContent = 'Sending request...';
 
       try {
-        const response = await fetch(`${baseUrl}/api/teams/generate`, {
+        const response = await fetch('/api/teams/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(defaultPayload)
         });
 
         const text = await response.text();
@@ -76,12 +43,13 @@
         output.textContent = JSON.stringify({
           status: response.status,
           ok: response.ok,
-          body: parsed
+          request: defaultPayload,
+          response: parsed
         }, null, 2);
       } catch (error) {
         output.textContent = JSON.stringify({
           error: String(error),
-          hint: 'Ensure the Spring Boot service is running and accessible from this browser.'
+          hint: 'Open this page from the deployed Spring Boot app URL (same host/port as API).'
         }, null, 2);
       }
     });

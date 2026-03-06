@@ -49,13 +49,13 @@ Service starts on `http://localhost:8080`.
 
 ## API test page
 
-A simple browser-based tester is available at `src/main/resources/static/index.html`.
+A simple browser-based quick tester is available at `src/main/resources/static/index.html`.
 
 When the service is running, open:
 
 - `http://<DEPLOY_HOST>:<APP_PORT>/`
 
-It will send requests to `POST /api/teams/generate` and display the JSON response.
+Click **Run Default Test** to send built-in sample payload data to `POST /api/teams/generate` and display the JSON response.
 
 ## Validation rules
 
