@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team API Quick Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    button { padding: 0.6rem 1rem; cursor: pointer; }
+    pre { background: #111827; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>Team API Quick Test</h1>
+  <p>Click the button to send default test data to <code>POST http://&lt;host&gt;:8081/api/teams/generate</code>.</p>
+  <button id="runTest">Run Default Test</button>
+  <pre id="output">No request sent yet.</pre>
+
+  <script>
+    const output = document.getElementById('output');
+    const apiBaseUrl = `${window.location.protocol}//${window.location.hostname || 'localhost'}:8081`;
+
+    const defaultPayload = {
+      participants: ["Alice", "Bob", "Charlie", "Dana", "Eli", "Fran", "Gabe"],
+      minTeamSize: 2,
+      maxTeamSize: 4,
+      idealTeamSize: 3
+    };
+
+    document.getElementById('runTest').addEventListener('click', async () => {
+      output.textContent = 'Sending request...';
+
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/teams/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(defaultPayload)
+        });
+
+        const text = await response.text();
+        let parsed;
+        try { parsed = JSON.parse(text); } catch { parsed = text; }
+
+        output.textContent = JSON.stringify({
+          status: response.status,
+          ok: response.ok,
+          request: defaultPayload,
+          response: parsed
+        }, null, 2);
+      } catch (error) {
+        output.textContent = JSON.stringify({
+          error: String(error),
+          hint: 'Ensure port 8081 is open and the API is reachable at the same host on port 8081.'
+        }, null, 2);
+      }
+    });
+  </script>
+</body>
+</html>
